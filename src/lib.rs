@@ -1,16 +1,28 @@
 use wasm_bindgen::prelude::*;
-use fingerprint_rs::FingerPrint;
+use serde_json;
+use fingerprint_rs::FingerPrint as ExternalFingerPrint;
+
+mod structs;
+
+use structs::{
+    FingerPrint,
+    WindowFingerPrint,
+    AudioFingerPrint,
+    CanvasFingerPrint,
+    WebGLFingerPrint,
+};
 
 #[wasm_bindgen]
 pub async fn get_fingerprint() -> Result<String, JsValue> {
-    match FingerPrint::new().await {
-        Some(fp) => {
-            // Formata diretamente a string
-            let fp_string = format!("{:?}", fp);
+    match ExternalFingerPrint::new().await {
+        Some(external_fp) => {
+            let my_serializable_fp: FingerPrint = external_fp.into();
 
-            // Retorna a string formatada
-            Ok(fp_string)
+            match serde_json::to_string(&my_serializable_fp) {
+                Ok(json_string) => Ok(json_string),
+                Err(e) => Err(JsValue::from_str(&format!("Erro ao serializar para JSON: {}", e))),
+            }
         }
-        None => Err(JsValue::from_str("Não foi possível gerar o fingerprint")),
+        None => Err(JsValue::from_str("Não foi possível gerar o fingerprint da biblioteca externa")),
     }
 }
