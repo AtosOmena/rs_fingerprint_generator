@@ -3,7 +3,7 @@
 OUT_DIR ?= ./pkg
 
 # Função para limpar a compilação do módulo
-clean:
+clear:
 	@echo "Limpando compilação do projeto $(basename $(pwd))"
 	@rm -rf pkg
 	@rm -rf target
